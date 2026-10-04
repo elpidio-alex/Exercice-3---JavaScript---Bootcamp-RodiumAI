@@ -52,7 +52,7 @@ Ce projet est la version JavaScript de l'exercice 3 : refaire le script interact
 
 | Élément | Version |
 |---|---|
-| Node.js | 18 ou plus (version utilisée : [à compléter, résultat de `node --version`]) |
+| Node.js | 18 ou plus |
 | npm | fourni avec Node.js |
 | Compte RodiumAi | avec des crédits RODI et une clé API (`rd_sk_...`) |
 
