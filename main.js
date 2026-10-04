@@ -1,3 +1,13 @@
+/*
+Date : 01/10/2026
+Auteurs : Elpidio Alexis AMOUSSOU
+Email : amoussouelpidioalexis@gmail.com
+But : Script en python pour l'exercice 3 du Bootcamp RodiumAI.
+    - Étape 1 : Chat avec un modèle de langage
+    - Étape 2 : Génération d'image
+    - Étape 3 : Génération de vidéo
+*/
+
 import 'dotenv/config';
 import { writeFileSync } from 'node:fs';
 import readline from 'node:readline/promises';
