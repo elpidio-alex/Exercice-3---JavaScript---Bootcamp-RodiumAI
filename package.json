@@ -1,0 +1,17 @@
+{
+  "name": "exercice-3-javascript",
+  "version": "1.0.0",
+  "description": "Script interactif chat, image, video avec le SDK rodiumai",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "rodiumai": "^0.2.0"
+  }
+}
