@@ -12,6 +12,6 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "rodiumai": "^0.2.0"
+    "rodiumai": "^0.3.1"
   }
 }

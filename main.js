@@ -2,7 +2,7 @@
 Date : 01/10/2026
 Auteurs : Elpidio Alexis AMOUSSOU
 Email : amoussouelpidioalexis@gmail.com
-But : Script en python pour l'exercice 3 du Bootcamp RodiumAI.
+But : Script en JavaScript (Node.js) pour l'exercice 3 du Bootcamp RodiumAI.
     - Étape 1 : Chat avec un modèle de langage
     - Étape 2 : Génération d'image
     - Étape 3 : Génération de vidéo
@@ -40,6 +40,31 @@ function showError(err) {
   }
 }
 
+// Affiche cost_rodi quand la réponse le contient (SDK 0.3.x), sinon renvoie au dashboard.
+function showCost(rep) {
+  const cost = rep?.cost_rodi ?? rep?.raw?.cost_rodi ?? rep?.raw?.rodiumai?.cost_rodi;
+  if (cost != null) {
+    console.log(`Coût : ${cost} RODI`);
+  } else {
+    console.log("Coût : cost_rodi absent de la réponse (voir les logs d'usage du dashboard)");
+  }
+}
+
+// Enregistre un média reçu en base64 (b64_json) ou, à défaut, en le téléchargeant via son URL.
+async function saveMedia(item, filename) {
+  if (item?.b64_json) {
+    writeFileSync(filename, Buffer.from(item.b64_json, 'base64'));
+    return true;
+  }
+  if (item?.url && item.url.startsWith('http')) {
+    const res = await fetch(item.url);
+    if (!res.ok) throw new Error(`téléchargement impossible (HTTP ${res.status})`);
+    writeFileSync(filename, Buffer.from(await res.arrayBuffer()));
+    return true;
+  }
+  return false;
+}
+
 async function stepChat() {
   const question = (await rl.question('Votre question : ')).trim();
   if (!question) {
@@ -58,15 +83,14 @@ async function stepChat() {
         `Tokens : ${rep.usage.prompt_tokens} en entrée, ${rep.usage.completion_tokens} en sortie`
       );
     }
-    // Le SDK ne renvoie pas cost_rodi : le coût se lit dans les logs d'usage du dashboard.
-    console.log('Coût : non fourni par le SDK (voir les logs d\'usage du dashboard)');
+    showCost(rep);
   } catch (err) {
     showError(err);
   }
 }
 
 async function stepImage() {
-  const prompt = (await rl.question('Décrivez l\'image : ')).trim();
+  const prompt = (await rl.question("Décrivez l'image : ")).trim();
   if (!prompt) {
     console.log('Description vide, étape ignorée.');
     return;
@@ -80,16 +104,12 @@ async function stepImage() {
       quality: 'low',
       timeout: 120000,
     });
-    const item = rep.data[0];
-    if (item?.b64_json) {
-      writeFileSync('image.png', Buffer.from(item.b64_json, 'base64'));
+    if (await saveMedia(rep.data?.[0], 'image.png')) {
       console.log('Image enregistrée : image.png');
-    } else if (item?.url) {
-      console.log(`Le serveur a renvoyé une URL au lieu de base64 : ${item.url}`);
     } else {
       console.log('Réponse reçue, mais sans image exploitable.');
     }
-    console.log('Coût : non fourni par le SDK (voir les logs d\'usage du dashboard)');
+    showCost(rep);
   } catch (err) {
     showError(err);
   }
@@ -101,6 +121,7 @@ async function stepVideo() {
     console.log('Description vide, étape ignorée.');
     return;
   }
+  console.log('Génération en cours (cela peut prendre plusieurs minutes)...');
   try {
     const rep = await client.video.generations.create({
       model: VIDEO_MODEL,
@@ -109,15 +130,12 @@ async function stepVideo() {
       aspect_ratio: '9:16',
       timeout: 150000,
     });
-    const item = rep?.data?.[0];
-    if (item?.b64_json) {
-      writeFileSync('video.mp4', Buffer.from(item.b64_json, 'base64'));
+    if (await saveMedia(rep?.data?.[0], 'video.mp4')) {
       console.log('Vidéo enregistrée : video.mp4');
-    } else if (item?.url) {
-      console.log(`Vidéo disponible à l'adresse : ${item.url}`);
     } else {
       console.log('Réponse reçue, mais sans vidéo exploitable.');
     }
+    showCost(rep);
   } catch (err) {
     showError(err);
   }
